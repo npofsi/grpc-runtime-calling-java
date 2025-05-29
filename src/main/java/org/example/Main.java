@@ -2,6 +2,7 @@ package org.example;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.DynamicMessage;
+import com.google.protobuf.Struct;
 import io.grpc.MethodDescriptor;
 import io.grpc.protobuf.ProtoUtils;
 
@@ -13,7 +14,11 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
         // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+
+        String jsonStr = "{ HelloRequest:{ name: 1}  }";
+        Struct.Builder pbuilder = ProtobufFactory.JsonString2Protobuf(jsonStr);
+
+        System.out.printf(pbuilder.toString());
 
 
     }
