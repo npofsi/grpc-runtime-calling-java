@@ -55,6 +55,7 @@ public class GrpcClient {
             //
             //Start of building request:
             //
+            //If using ProtoJson, the json message will be { username: test }
             //Define package name and message type name
             String requestPackageName = "org.example.protobuf";
             String requestMessageName = "HelloRequest";
@@ -86,26 +87,27 @@ public class GrpcClient {
             DynamicMessage.Builder requestBuilder = DynamicMessage.newBuilder(requestFileDescriptor.findMessageTypeByName(requestMessageName));
 
             //Also can create message builder using ProtoJSON format, but ProtoJSON is lack for a precise converter with no-typed JSON
-            //Not use this method.
+            //Do not use this method.
             //Parse Json format protobuf message and merge it to empty DynamicMessageBuilder
-//            JsonFormat.parser().ignoringUnknownFields().merge(jsonStr,requestBuilder);
+            //JsonFormat.parser().ignoringUnknownFields().merge(jsonStr,requestBuilder);
 
             //set field in message with payloads
             requestBuilder.setField(requestFileDescriptor.findMessageTypeByName(requestMessageName).findFieldByName("username"), "test");
-            System.out.println(requestBuilder.getAllFields());
+            System.out.println(requestMessageDescriptorProto);
+
 
             //Build request message Instance
             Message request = requestBuilder.build();//HelloRequest.newBuilder().setName(name).build();
-
+            System.out.println(request);
             //
             //Start of building response:
             //
             //Define response message using JsonFormat
-            String jsonStr2 = "{  \"name\": \"\" }";
+            //If using ProtoJson, json message will be "{ name: null }";
             Descriptors.Descriptor responseDescriptor = DescriptorProtos.DescriptorProto.getDescriptor();// DescriptorProtos.getDescriptor().
             DynamicMessage.Builder responseBuilder = DynamicMessage.newBuilder(responseDescriptor);
 
-            JsonFormat.parser().ignoringUnknownFields().merge(jsonStr2,responseBuilder);
+//            JsonFormat.parser().ignoringUnknownFields().merge(jsonStr2,responseBuilder);
             System.out.println(responseBuilder.getAllFields());
             Message response = responseBuilder.build();
 
