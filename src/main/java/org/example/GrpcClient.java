@@ -52,51 +52,54 @@ public class GrpcClient {
 
         try {
 
-
+            //
             //Start of building request:
-
-            //Define request message using JsonFormat,
-            //which can be transformed from RPC Parameters Json from frontend or User Defined Protobuf.
-//            String jsonStr = "{  \"username\": \"test\" }";
+            //
+            //Define package name and message type name
             String requestPackageName = "org.example.protobuf";
             String requestMessageName = "HelloRequest";
-            //Create empty DynamicMessage Builder from Empty Descriptor
-//            DescriptorProtos.FileOptions requestFileOptions = DescriptorProtos.FileOptions.newBuilder()
-//                    .setJavaPackage(requestPackageName).build();
 
+            //Create empty field
             DescriptorProtos.FieldDescriptorProto.Builder fieldDescriptorProto = DescriptorProtos.FieldDescriptorProto.newBuilder()
                     .setName("username")
                     .setNumber(1)
                     .setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING)
                     .setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED)
                     .setDefaultValue("");
+
+            //Create message type with type name
             Descriptors.Descriptor requestDescriptor = DescriptorProtos.DescriptorProto.getDescriptor();
             DescriptorProtos.DescriptorProto.Builder requestMessageDescriptorProto = DescriptorProtos.DescriptorProto.newBuilder()
                     .setName(requestMessageName)
                     .addField(fieldDescriptorProto);
 
+            //Create file to attach package name on message type
             DescriptorProtos.FileDescriptorProto requestFileDescriptorProto =
                     DescriptorProtos.FileDescriptorProto.newBuilder()
                             .setPackage(requestPackageName)
                             .addMessageType(requestMessageDescriptorProto)
-//                            .mergeOptions(requestFileOptions)
                             .build();
             Descriptors.FileDescriptor requestFileDescriptor =
                     Descriptors.FileDescriptor.buildFrom(requestFileDescriptorProto, new Descriptors.FileDescriptor[0]);
+
+            //Create message builder with defined message type
             DynamicMessage.Builder requestBuilder = DynamicMessage.newBuilder(requestFileDescriptor.findMessageTypeByName(requestMessageName));
-//            requestBuilder.
-//            Struct.Builder requestBuilder = ;
+
+            //Also can create message builder using ProtoJSON format, but ProtoJSON is lack for a precise converter with no-typed JSON
+            //Not use this method.
             //Parse Json format protobuf message and merge it to empty DynamicMessageBuilder
 //            JsonFormat.parser().ignoringUnknownFields().merge(jsonStr,requestBuilder);
+
+            //set field in message with payloads
             requestBuilder.setField(requestFileDescriptor.findMessageTypeByName(requestMessageName).findFieldByName("username"), "test");
             System.out.println(requestBuilder.getAllFields());
 
-            //Build request Message Instance
+            //Build request message Instance
             Message request = requestBuilder.build();//HelloRequest.newBuilder().setName(name).build();
 
-
+            //
             //Start of building response:
-
+            //
             //Define response message using JsonFormat
             String jsonStr2 = "{  \"name\": \"\" }";
             Descriptors.Descriptor responseDescriptor = DescriptorProtos.DescriptorProto.getDescriptor();// DescriptorProtos.getDescriptor().
