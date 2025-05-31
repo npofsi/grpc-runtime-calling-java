@@ -1,0 +1,104 @@
+package org.example;
+
+
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Struct;
+import com.google.protobuf.util.JsonFormat;
+import io.grpc.CallOptions;
+import io.grpc.MethodDescriptor;
+import io.grpc.stub.AbstractStub;
+
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static io.grpc.MethodDescriptor.generateFullMethodName;
+
+public class GrpcDynamicService {
+
+    public io.grpc.Channel mChannel;
+
+    public GrpcDynamicService(io.grpc.Channel channel) {
+        this.mChannel = channel;
+    }
+
+
+    MethodDescriptor buildMethod(String serviceName, String methodName, Message request, Message response) {
+        io.grpc.MethodDescriptor getSayHelloAgainMethod;
+
+
+        return io.grpc.MethodDescriptor.<Message, Message>newBuilder()
+                .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                .setFullMethodName(generateFullMethodName(serviceName, methodName))
+                .setSampledToLocalTracing(true)
+                .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                        request))
+                .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                        response))
+                .setSchemaDescriptor(new CustomMethodDescriptorSupplier(serviceName, methodName))
+                .build();
+
+
+    }
+
+    private static final class CustomMethodDescriptorSupplier
+            extends CustomBaseDescriptorSupplier
+            implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
+        private final java.lang.String methodName;
+
+        CustomMethodDescriptorSupplier(String serviceName, String methodName) {
+            super(serviceName);
+            this.methodName = methodName;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.MethodDescriptor getMethodDescriptor() {
+            return getServiceDescriptor().findMethodByName(methodName);
+        }
+    }
+
+
+    private static class CustomBaseDescriptorSupplier
+            implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
+        String mServiceName;
+
+        public CustomBaseDescriptorSupplier(String serviceName) {
+            this.mServiceName = serviceName;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
+            return org.example.protobuf.ProtoRepo.getDescriptor();
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
+            return getFileDescriptor().findServiceByName(mServiceName);
+        }
+
+
+    }
+
+    private static final class CustomFileDescriptorSupplier
+            extends CustomBaseDescriptorSupplier {
+        CustomFileDescriptorSupplier(String serviceName) {
+            super(serviceName);
+        }
+    }
+
+    Object call(MethodDescriptor methodDescriptor, com.google.protobuf.Message request, CallOptions callOptions) {
+        return io.grpc.stub.ClientCalls.blockingUnaryCall(mChannel, methodDescriptor, callOptions, request);
+    }
+
+    public static String toJson(MessageOrBuilder messageOrBuilder) throws IOException {
+        return JsonFormat.printer().print(messageOrBuilder);
+    }
+
+    public static Message fromJson(String json) throws IOException {
+        Struct.Builder structBuilder = Struct.newBuilder();
+        JsonFormat.parser().ignoringUnknownFields().merge(json, structBuilder);
+        return structBuilder.build();
+    }
+}

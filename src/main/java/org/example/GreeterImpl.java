@@ -12,7 +12,7 @@ public class GreeterImpl extends GreeterGrpc.GreeterImplBase {
     @Override
     public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
         // Generate a greeting message for the original method
-        HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
+        HelloReply reply = HelloReply.newBuilder().setName("Hello " + req.getUsername()).build();
 
         // Send the reply back to the client.
         responseObserver.onNext(reply);
@@ -24,7 +24,7 @@ public class GreeterImpl extends GreeterGrpc.GreeterImplBase {
     @Override
     public void sayHelloAgain(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
         // Generate another greeting message for the new method.
-        HelloReply reply = HelloReply.newBuilder().setMessage("Hello again " + req.getName()).build();
+        HelloReply reply = HelloReply.newBuilder().setName("Hello again " + req.getUsername()).build();
 
         // Send the reply back to the client.
         responseObserver.onNext(reply);

@@ -86,6 +86,11 @@
             <artifactId>json</artifactId>
             <version>20250517</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.os72</groupId>
+            <artifactId>protobuf-dynamic</artifactId>
+            <version>1.0.1</version>
+        </dependency>
     </dependencies>
     <build>
         <extensions>
