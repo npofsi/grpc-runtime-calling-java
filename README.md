@@ -19,6 +19,8 @@
 
 ## Build the project
 
+Run mvn package command.
+
 ```bash
 mvn clean package
 ```
