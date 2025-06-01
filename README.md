@@ -14,7 +14,7 @@
 - `src/main/java/org/example/GrpcClientPrimitive.java`: A gRPC client that uses generated classes to call the server.
 - `src/main/java/org/example/GrpcClient.java`: A gRPC client that constructs the service and method calls at runtime without using generated classes.
 - `src/main/proto/server.proto`: The Protocol Buffers definition for the gRPC service.
-- `src/main/java/org/example/protobuf`: Contains the generated Java classes from the Protocol Buffers definition.
+- `src/main/java/org/example/protobuf`(after build): Contains the generated Java classes from the Protocol Buffers definition.
 - `pom.xml`: The Maven configuration file for building the project.
 
 ## Build the project
