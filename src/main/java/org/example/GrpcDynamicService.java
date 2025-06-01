@@ -25,7 +25,13 @@ public class GrpcDynamicService {
         this.mChannel = channel;
     }
 
-
+    /**
+     * <pre>
+     * build callable method descriptor
+     * </pre>
+     *
+     * @return MethodDescriptor of the call.
+     */
     MethodDescriptor buildMethod(String serviceName, String methodName, Message request, Message response) {
 
         //Create RPC method desc.
