@@ -28,6 +28,7 @@ public class GrpcDynamicService {
 
     MethodDescriptor buildMethod(String serviceName, String methodName, Message request, Message response) {
 
+        //Create RPC method desc.
         //Only unary methods are considered as a demo.
         return io.grpc.MethodDescriptor.<Message, Message>newBuilder()
                 .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
@@ -37,11 +38,13 @@ public class GrpcDynamicService {
                         request))
                 .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                         response))
+                //add dedicated schema, which include the method full name "servicename.methodname"
                 .setSchemaDescriptor(new CustomMethodDescriptorSupplier(serviceName, methodName))
                 .build();
 
     }
 
+    //Create a dedicated RPC method schema with service name and method name.
     private static final class CustomMethodDescriptorSupplier
             extends CustomBaseDescriptorSupplier
             implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
@@ -58,7 +61,7 @@ public class GrpcDynamicService {
         }
     }
 
-
+    //Flexiable service Descriptor
     private static class CustomBaseDescriptorSupplier
             implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
         String mServiceName;
@@ -76,6 +79,7 @@ public class GrpcDynamicService {
         }
     }
 
+    //Use grpc to call the method, only blockingUnaryCall is demostrated here.
     Object call(MethodDescriptor methodDescriptor, com.google.protobuf.Message request, CallOptions callOptions) {
         return io.grpc.stub.ClientCalls.blockingUnaryCall(mChannel, methodDescriptor, callOptions, request);
     }
