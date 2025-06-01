@@ -12,6 +12,7 @@ import io.grpc.stub.ClientResponseObserver;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,8 +58,9 @@ public class GrpcClient {
             //
             //If using ProtoJson, the json message will be { username: test }
             //Define package name and message type name
-            String requestPackageName = "org.example.protobuf";
+            String packageName = "org.example.protobuf";
             String requestMessageName = "HelloRequest";
+            String responseMessageName = "HelloReply";
 
             //Create empty field
             DescriptorProtos.FieldDescriptorProto.Builder fieldDescriptorProto = DescriptorProtos.FieldDescriptorProto.newBuilder()
@@ -77,7 +79,7 @@ public class GrpcClient {
             //Create file to attach package name on message type
             DescriptorProtos.FileDescriptorProto requestFileDescriptorProto =
                     DescriptorProtos.FileDescriptorProto.newBuilder()
-                            .setPackage(requestPackageName)
+                            .setPackage(packageName)
                             .addMessageType(requestMessageDescriptorProto)
                             .build();
             Descriptors.FileDescriptor requestFileDescriptor =
@@ -93,34 +95,53 @@ public class GrpcClient {
 
             //set field in message with payloads
             requestBuilder.setField(requestFileDescriptor.findMessageTypeByName(requestMessageName).findFieldByName("username"), "test");
-            System.out.println(requestMessageDescriptorProto);
-
-
             //Build request message Instance
             Message request = requestBuilder.build();//HelloRequest.newBuilder().setName(name).build();
-            System.out.println(request);
+
+
             //
             //Start of building response:
             //
             //Define response message using JsonFormat
             //If using ProtoJson, json message will be "{ name: null }";
-            Descriptors.Descriptor responseDescriptor = DescriptorProtos.DescriptorProto.getDescriptor();// DescriptorProtos.getDescriptor().
-            DynamicMessage.Builder responseBuilder = DynamicMessage.newBuilder(responseDescriptor);
+            //Create empty field
+            DescriptorProtos.FieldDescriptorProto.Builder responseFieldDescriptorProto = DescriptorProtos.FieldDescriptorProto.newBuilder()
+                    .setName("message")
+                    .setNumber(1)
+                    .setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING)
+                    .setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED)
+                    .setDefaultValue("");
 
-//            JsonFormat.parser().ignoringUnknownFields().merge(jsonStr2,responseBuilder);
-            System.out.println(responseBuilder.getAllFields());
+            //Create message type with type name
+            Descriptors.Descriptor responseDescriptor = DescriptorProtos.DescriptorProto.getDescriptor();
+            DescriptorProtos.DescriptorProto.Builder responseMessageDescriptorProto = DescriptorProtos.DescriptorProto.newBuilder()
+                    .setName(responseMessageName)
+                    .addField(fieldDescriptorProto);
+
+            //Create file to attach package name on message type
+            DescriptorProtos.FileDescriptorProto responseFileDescriptorProto =
+                    DescriptorProtos.FileDescriptorProto.newBuilder()
+                            .setPackage(packageName)
+                            .addMessageType(responseMessageDescriptorProto)
+                            .build();
+            Descriptors.FileDescriptor responseFileDescriptor =
+                    Descriptors.FileDescriptor.buildFrom(responseFileDescriptorProto, new Descriptors.FileDescriptor[0]);
+
+            //Build response message instance
+            DynamicMessage.Builder responseBuilder = DynamicMessage.newBuilder(responseDescriptor);
             Message response = responseBuilder.build();
 
             System.out.println("Send Request:\n" + request.toBuilder().build().toString());
 
+            //Create RPC Method, please go to GrpcDynamicService:buildMethod for details.
             GrpcDynamicService stubService = new GrpcDynamicService(channel);
             MethodDescriptor methodDescriptor = stubService.buildMethod("org.example.protobuf.Greeter", "SayHello", request, response);
 
+            //Make rpc call and merge response to existed response instance.
             CallOptions callOptions = CallOptions.DEFAULT;
-            responseBuilder.mergeFrom((Message) stubService.call(methodDescriptor, request,  callOptions));
+            responseBuilder.mergeFrom((Message) stubService.call(methodDescriptor, request, callOptions));
             System.out.println("Received Response:\n" + responseBuilder.build());
-//            GrpcClient client = new GrpcClient(channel);
-//            client.greet(user);
+
         } finally {
             // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
             // resources the channel should be shut down when it will no longer be used. If it may be used
@@ -129,59 +150,6 @@ public class GrpcClient {
         }
     }
 
-//
-//    private final GreeterGrpc.GreeterBlockingStub blockingStub;
-//
-//    /** Construct client for accessing server using the existing channel. */
-//    public GrpcClient(Channel channel) {
-//        // 'channel' here is a Channel, not a ManagedChannel, so it is not this code's responsibility to
-//        // shut it down.
-//
-//        // Passing Channels to code makes code easier to test and makes it easier to reuse Channels.
-//        blockingStub = GreeterGrpc.newBlockingStub(channel);
-//    }
-//
-//    /** Say hello to server. */
-//    public void greet(String name) throws InvalidProtocolBufferException {
-//        logger.info("Will try to greet " + name + " ...");
-//
-//
-//        String jsonStr = "{ \"HelloRequest\":{ name: 1}  }";
-//        Message.Builder pbuilder = ProtobufFactory.JsonString2Protobuf(jsonStr);
-//
-//
-//
-//        Message request = pbuilder.build();//HelloRequest.newBuilder().setName(name).build();
-//        HelloReply response;
-//        try {
-//            response = blockingStub.sayHello(request);
-//        } catch (StatusRuntimeException e) {
-//            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-//            return;
-//        }
-//        logger.info("Greeting: " + response.getMessage());
-//    }
-
-    /**
-     * Greet server. If provided, the first element of {@code args} is the name to use in the
-     * greeting. The second argument is the target server.
-     */
-
-//    static MethodDescriptor from(
-//            Descriptors.MethodDescriptor methodDesc
-//    ) {
-//        return MethodDescriptor.<DynamicMessage, DynamicMessage>newBuilder()
-//                // UNKNOWN is fine, but the "correct" value can be computed from
-//                // methodDesc.toProto().getClientStreaming()/getServerStreaming()
-//                .setType(getMethodTypeFromDesc(methodDesc))
-//                .setFullMethodName(MethodDescriptor.generateFullMethodName(
-//                        serviceDesc.getFullName(), methodDesc.getName()))
-//                .setRequestMarshaller(ProtoUtils.marshaller(
-//                        DynamicMessage.getDefaultInstance(methodDesc.getInputType())))
-//                .setResponseMarshaller(ProtoUtils.marshaller(
-//                        DynamicMessage.getDefaultInstance(methodDesc.getOutputType())))
-//                .build();
-//    }
     static MethodDescriptor.MethodType getMethodTypeFromDesc(
             Descriptors.MethodDescriptor methodDesc
     ) {

@@ -1,6 +1,7 @@
 package org.example;
 
 
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Struct;
@@ -26,9 +27,8 @@ public class GrpcDynamicService {
 
 
     MethodDescriptor buildMethod(String serviceName, String methodName, Message request, Message response) {
-        io.grpc.MethodDescriptor getSayHelloAgainMethod;
 
-
+        //Only unary methods are considered as a demo.
         return io.grpc.MethodDescriptor.<Message, Message>newBuilder()
                 .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
                 .setFullMethodName(generateFullMethodName(serviceName, methodName))
@@ -39,7 +39,6 @@ public class GrpcDynamicService {
                         response))
                 .setSchemaDescriptor(new CustomMethodDescriptorSupplier(serviceName, methodName))
                 .build();
-
 
     }
 
@@ -67,38 +66,17 @@ public class GrpcDynamicService {
         public CustomBaseDescriptorSupplier(String serviceName) {
             this.mServiceName = serviceName;
         }
-
         @java.lang.Override
         public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-            return org.example.protobuf.ProtoRepo.getDescriptor();
+            return DescriptorProtos.FileDescriptorProto.getDescriptor().getFile();
         }
-
         @java.lang.Override
         public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
             return getFileDescriptor().findServiceByName(mServiceName);
-        }
-
-
-    }
-
-    private static final class CustomFileDescriptorSupplier
-            extends CustomBaseDescriptorSupplier {
-        CustomFileDescriptorSupplier(String serviceName) {
-            super(serviceName);
         }
     }
 
     Object call(MethodDescriptor methodDescriptor, com.google.protobuf.Message request, CallOptions callOptions) {
         return io.grpc.stub.ClientCalls.blockingUnaryCall(mChannel, methodDescriptor, callOptions, request);
-    }
-
-    public static String toJson(MessageOrBuilder messageOrBuilder) throws IOException {
-        return JsonFormat.printer().print(messageOrBuilder);
-    }
-
-    public static Message fromJson(String json) throws IOException {
-        Struct.Builder structBuilder = Struct.newBuilder();
-        JsonFormat.parser().ignoringUnknownFields().merge(json, structBuilder);
-        return structBuilder.build();
     }
 }
