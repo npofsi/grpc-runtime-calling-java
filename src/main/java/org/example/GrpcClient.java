@@ -1,20 +1,9 @@
 package org.example;
 
 import com.google.protobuf.*;
-import com.google.protobuf.util.JsonFormat;
 import io.grpc.*;
-import io.grpc.protobuf.ProtoUtils;
-import io.grpc.stub.ClientCallStreamObserver;
-import io.grpc.stub.ClientResponseObserver;
-//import org.example.protobuf.GreeterGrpc;
-//import org.example.protobuf.HelloReply;
-//import org.example.protobuf.HelloRequest;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
